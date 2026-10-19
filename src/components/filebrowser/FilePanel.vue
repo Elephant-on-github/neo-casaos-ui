@@ -132,6 +132,11 @@
 										</b-field>
 									</div>
 									<div class="view-btns is-flex-shrink-0">
+										<b-tooltip :label="$t('Show Hidden Files')" position="is-left" type="is-dark">
+											<p class="is-clickable none-line-height mr-3" role="button" @click="toggleShowHidden">
+												<b-icon :icon="showHidden ? 'eye' : 'eye-off'"></b-icon>
+											</p>
+										</b-tooltip>
 										<b-tooltip :label="$t('Change View')" position="is-left" type="is-dark">
 											<p class="is-clickable none-line-height" role="button" @click="changeView">
 												<b-icon :icon="viewIcon"></b-icon>
@@ -320,6 +325,7 @@ export default {
 			currentPath: "",
 			currentPathName: "",
 			isViewGird: true,
+			showHidden: localStorage.getItem("casaos_show_hidden") === "true",
 			listData: [],
 			selectedArray: [],
 			file: null,
@@ -578,10 +584,12 @@ export default {
 								extensions: item.extensions,
 							};
 						});
-						// filter hidden files
-						const filterList = newFileList.filter((item) => {
-							return !item.name.startsWith(".");
-						});
+						// filter hidden files unless "show hidden" is enabled
+						const filterList = this.showHidden
+							? newFileList
+							: newFileList.filter((item) => {
+									return !item.name.startsWith(".");
+								});
 						this.listData = orderBy(filterList, ["is_dir"], ["desc"]);
 						this.handelListChange(this.listData);
 						this.errorMsg = "";
@@ -615,6 +623,15 @@ export default {
 		changeView() {
 			this.isViewGird = !this.$store.state.isViewGird;
 			this.$store.commit("SET_IS_VIEW_GRID", this.isViewGird);
+		},
+
+		/**
+		 * @description: Toggle visibility of hidden (dot) files and re-list the folder
+		 */
+		toggleShowHidden() {
+			this.showHidden = !this.showHidden;
+			localStorage.setItem("casaos_show_hidden", String(this.showHidden));
+			this.reload();
 		},
 
 		/**
