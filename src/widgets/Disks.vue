@@ -67,6 +67,24 @@
 		</div>
 
 		<!-- Usb Disk List End -->
+
+		<!-- Drive Health Start -->
+		<div v-if="smartList.length > 0" class="widget has-text-white disk is-relative">
+			<div class="blur-background"></div>
+			<div class="widget-content">
+				<div class="widget-header is-flex pt-2">
+					<div class="widget-title is-flex-grow-1">
+						{{ $t('Drive Health') }}
+					</div>
+				</div>
+				<div v-for="d in smartList" :key="d.device" class="is-flex is-align-items-center is-size-14px smart-row py-1">
+					<b-tag :type="healthTagType(d.health)" class="is-flex-shrink-0 mr-2 smart-tag">{{ $t(d.health) }}</b-tag>
+					<span class="is-flex-grow-1 one-line has-text-grey-100">{{ d.model || d.device }}</span>
+					<span v-if="d.temperature > 0" class="has-text-grey-100 ml-2">{{ d.temperature }}°C</span>
+				</div>
+			</div>
+		</div>
+		<!-- Drive Health End -->
 	</div>
 </template>
 
@@ -88,13 +106,15 @@ export default {
 			totalUsed: 0,
 			totalPercent: 0,
 			health: "Healthy",
-			usbDisks: []
+			usbDisks: [],
+			smartList: []
 		}
 	},
 
 	mounted() {
 		this.getDiskInfo(this.$store.state.hardwareInfo.sys_disk)
 		this.usbDisks = this.$store.state.hardwareInfo.sys_usb
+		this.getSMARTInfo()
 	},
 	methods: {
 		getDiskInfo(diskInfo) {
@@ -102,6 +122,25 @@ export default {
 			this.totalUsed = diskInfo.used
 			this.totalPercent = 100 - Math.floor(diskInfo.avail * 100 / this.totalSize)
 			this.health = diskInfo.health
+		},
+
+		async getSMARTInfo() {
+			try {
+				const res = await this.$api.sys.getSMARTInfo()
+				const list = res.data?.data || []
+				// hide drives we know nothing about (e.g. smartctl not installed)
+				this.smartList = list.filter(
+					(d) => d.health !== 'UNKNOWN' || d.model
+				)
+			} catch (e) {
+				this.smartList = []
+			}
+		},
+
+		healthTagType(health) {
+			if (health === 'PASSED') return 'is-success'
+			if (health === 'FAILED') return 'is-danger'
+			return 'is-light'
 		},
 
 		showDiskManagement() {

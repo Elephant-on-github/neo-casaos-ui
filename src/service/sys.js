@@ -59,6 +59,11 @@ const sys = {
 		return api.get(`${PREFIX}/utilization`);
 	},
 
+	// get drive health (SMART) + temperature
+	getSMARTInfo() {
+		return api.get(`${PREFIX}/smart`);
+	},
+
 	// proxy request
 	getProxyRequestContent(url) {
 		return api.get(`${PREFIX}/proxy?url=${url}`)
