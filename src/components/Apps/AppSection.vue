@@ -60,7 +60,7 @@
 		</draggable>
 		<!-- App List End -->
 
-		<template v-if="oldAppList.length > 0">
+		<template v-if="exsitingAppsShow && oldAppList.length > 0">
 			<!-- Title Bar Start -->
 			<div class="title-bar is-flex is-align-items-center mt-2rem mb-5">
 				<app-section-title-tip
