@@ -111,6 +111,7 @@ export default {
       this.$store.commit('SET_SEARCH_ENGINE_SWITCH', systemConfig.data.data.search_switch)
       this.$store.commit('SET_RECOMMEND_SWITCH', systemConfig.data.data.recommend_switch)
       this.$store.commit('SET_RSS_SWITCH', systemConfig.data.data.rss_switch)
+      this.$store.commit('SET_EXISTING_APPS_SWITCH', systemConfig.data.data.existing_apps_switch)
       this.barData = systemConfig.data.data
       this.isLoading = false
     },

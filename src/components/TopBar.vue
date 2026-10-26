@@ -161,6 +161,7 @@ export default {
       if (saveRes.data.success === 200) {
         this.barData = saveRes.data.data
       }
+      this.$store.commit('SET_EXISTING_APPS_SWITCH', this.barData.existing_apps_switch)
     },
 
     /**

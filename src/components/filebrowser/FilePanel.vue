@@ -678,23 +678,28 @@ export default {
 				);
 				if (res.data.success == 200) {
 					const items = (res.data.data || []).map((item) => ({
-						date: null,
+						date: item.date,
 						isSelected: false,
 						is_dir: item.is_dir,
 						name: item.name,
 						path: item.path,
 						size: item.size,
 						write: false,
-						extensions: item.is_dir
-							? ""
-							: (item.name.split(".").pop() || ""),
+						// real shape is {share, mounted}; null = "nothing special"
+						// (same as TreeList.vue for non-shared items)
+						extensions: null,
 					}));
-					this.listData = orderBy(items, ["is_dir"], ["desc"]);
+					// filter hidden files unless "show hidden" is enabled
+					// (same rule as getFileList)
+					const filterList = this.showHidden
+						? items
+						: items.filter((item) => !item.name.startsWith("."));
+					this.listData = orderBy(filterList, ["is_dir"], ["desc"]);
 					this.handelListChange(this.listData);
 					// no matches → show the message holder instead of "new file" prompts
-					this.isEmpty = items.length > 0;
+					this.isEmpty = filterList.length > 0;
 					this.errorMsg =
-						items.length > 0 ? "" : this.$t("No matching files");
+						filterList.length > 0 ? "" : this.$t("No matching files");
 				}
 			} catch (error) {
 				this.$buefy.toast.open({
