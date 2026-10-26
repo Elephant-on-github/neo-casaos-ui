@@ -42,6 +42,7 @@ export default {
 		return {
 			timer: 0,
 			updateTimer: 0,
+			updateWatchdog: 0,
 			isUpdating: false,
 			markdown: ``,
 			updateLogs: ``
@@ -55,6 +56,12 @@ export default {
 
 			return marked.parse(this.updateLogs);
 		}
+	},
+	beforeDestroy() {
+		// Closing the modal mid-update must not leave the poll and the
+		// watchdog running against an unmounted component.
+		clearInterval(this.updateTimer);
+		clearTimeout(this.updateWatchdog);
 	},
 	methods: {
 		/**
@@ -73,6 +80,13 @@ export default {
 		 * @return {*} void
 		 */
 		getUpdateLogs() {
+			// Watchdog: the update script can die before writing anything
+			// (UpdateUrl unreachable, curl 404, disk full). Without this the
+			// poll below would spin forever with the button stuck in loading.
+			this.updateWatchdog = setTimeout(() => {
+				this.handleUpdateFailure();
+			}, 15 * 60 * 1000);
+
 			this.updateTimer = setInterval(() => {
 				this.$api.file.getContent(`/var/log/casaos/upgrade.log`).then(res => {
 
@@ -80,24 +94,38 @@ export default {
 					if (this.updateLogs.includes(`CasaOS upgrade successfully`)) {
 						localStorage.setItem('is_update', 'true')
 						clearInterval(this.updateTimer);
+						clearTimeout(this.updateWatchdog);
 						setTimeout(() => {
 							this.$router.replace({
 								path: '/logout'
 							})
 						}, 1000);
-					} else if (this.updateLogs.includes(`CasaOS upgrade failed`)) {
-						this.$buefy.toast.open({
-							message: this.$t(`There seems to be a problem with the upgrade process, please try again!`),
-							type: 'is-danger'
-						})
-						clearInterval(this.updateTimer);
-						setTimeout(() => {
-							this.isUpdating = false;
-						}, 1000);
-
+					} else if (this.updateLogs.includes(`CasaOS upgrade failed`) || this.updateLogs.includes(`FAILED`)) {
+						// The neo update script (build/update.sh) never writes the
+						// canonical failure line - it prints "- FAILED <reason>" and
+						// exits 1. Match that too, or the modal never recovers.
+						this.handleUpdateFailure();
 					}
+				}).catch(() => {
+					// Transient errors while the service restarts mid-update: keep polling.
 				})
 			}, 200);
+		},
+
+		/**
+		 * @description: Stop polling, surface the error, re-enable retry
+		 * @return {*} void
+		 */
+		handleUpdateFailure() {
+			clearInterval(this.updateTimer);
+			clearTimeout(this.updateWatchdog);
+			this.$buefy.toast.open({
+				message: this.$t(`There seems to be a problem with the upgrade process, please try again!`),
+				type: 'is-danger'
+			})
+			setTimeout(() => {
+				this.isUpdating = false;
+			}, 1000);
 		},
 		/**
 		 * @description: check update state if is_need is false then reload page
