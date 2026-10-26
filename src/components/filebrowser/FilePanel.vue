@@ -117,6 +117,19 @@
 
 								<!-- Header End -->
 
+								<!-- Search Start -->
+								<div class="is-flex is-align-items-center mb-2 is-flex-shrink-0">
+									<b-input
+										v-model="searchKeyword"
+										type="search"
+										size="is-small"
+										rounded
+										:placeholder="$t('Search files')"
+										@input="onSearchInput"
+									></b-input>
+								</div>
+								<!-- Search End -->
+
 								<!-- Tool Bar Start -->
 								<div v-if="listData.length > 0" class="tool-bar is-flex mb-2 mt-2 is-flex-shrink-0">
 									<div class="is-flex-grow-1 has-text-left is-flex is-align-items-center">
@@ -326,6 +339,8 @@ export default {
 			currentPathName: "",
 			isViewGird: true,
 			showHidden: localStorage.getItem("casaos_show_hidden") === "true",
+			searchKeyword: "",
+			searchTimer: null,
 			listData: [],
 			selectedArray: [],
 			file: null,
@@ -472,6 +487,7 @@ export default {
 		this.$EventBus.$on(events.HIDE_FILES_SIDEBAR, this.handleHideSideBar);
 	},
 	destroyed() {
+		clearTimeout(this.searchTimer);
 		this.$EventBus.$off(events.SHOW_FILES_SIDEBAR, this.handleShowSideBar);
 		this.$EventBus.$off(events.HIDE_FILES_SIDEBAR, this.handleHideSideBar);
 		this.destroyedAction();
@@ -564,6 +580,9 @@ export default {
 			// path = path.replace("//", "/")
 			this.pageType = "file";
 			this.currentPath = path;
+			// navigating cancels any active search (including pending debounce)
+			clearTimeout(this.searchTimer);
+			this.searchKeyword = "";
 			this.$store.commit("SET_CURRENT_PATH", path);
 			this.$api.folder
 				.getList(path)
@@ -632,6 +651,59 @@ export default {
 			this.showHidden = !this.showHidden;
 			localStorage.setItem("casaos_show_hidden", String(this.showHidden));
 			this.reload();
+		},
+
+		/**
+		 * @description: Debounced entry point for the search box.
+		 */
+		onSearchInput() {
+			clearTimeout(this.searchTimer);
+			const keyword = this.searchKeyword.trim();
+			if (!keyword) {
+				this.getFileList(this.currentPath || this.rootPath);
+				return;
+			}
+			this.searchTimer = setTimeout(() => this.doSearch(keyword), 300);
+		},
+
+		/**
+		 * @description: Recursive name search under the current folder.
+		 */
+		async doSearch(keyword) {
+			this.isLoading = true;
+			try {
+				const res = await this.$api.file.search(
+					this.currentPath || this.rootPath,
+					keyword
+				);
+				if (res.data.success == 200) {
+					const items = (res.data.data || []).map((item) => ({
+						date: null,
+						isSelected: false,
+						is_dir: item.is_dir,
+						name: item.name,
+						path: item.path,
+						size: item.size,
+						write: false,
+						extensions: item.is_dir
+							? ""
+							: (item.name.split(".").pop() || ""),
+					}));
+					this.listData = orderBy(items, ["is_dir"], ["desc"]);
+					this.handelListChange(this.listData);
+					// no matches → show the message holder instead of "new file" prompts
+					this.isEmpty = items.length > 0;
+					this.errorMsg =
+						items.length > 0 ? "" : this.$t("No matching files");
+				}
+			} catch (error) {
+				this.$buefy.toast.open({
+					message: this.$t("Search failed"),
+					type: "is-danger",
+				});
+			} finally {
+				this.isLoading = false;
+			}
 		},
 
 		/**

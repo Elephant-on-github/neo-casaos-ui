@@ -43,6 +43,14 @@ const file = {
 		});
 	},
 
+	// search file/dir names recursively under path
+	search(path, keyword) {
+		return api.get(`${PREFIX}/search`, {
+			path: path,
+			keyword: keyword
+		});
+	},
+
 }
 
 export default file;
