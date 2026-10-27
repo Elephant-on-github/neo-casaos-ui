@@ -70,7 +70,15 @@ export default {
 		 */
 		async updateSystem() {
 			this.isUpdating = true;
-			await this.$api.sys.updateCasaOS();
+			try {
+				await this.$api.sys.updateCasaOS();
+			} catch (e) {
+				// Backend POST /sys/update itself failed (network, 500). Without
+				// this the button stays in loading forever and getUpdateLogs never
+				// starts, so the user has no way to retry.
+				this.handleUpdateFailure();
+				return;
+			}
 			// this.checkUpdateState();
 			this.getUpdateLogs()
 		},
@@ -117,6 +125,9 @@ export default {
 		 * @return {*} void
 		 */
 		handleUpdateFailure() {
+			// Guard against a double call: the 15-min watchdog and the poll could
+			// both resolve in the same tick, or a retry could race the watchdog.
+			if (!this.isUpdating) return;
 			clearInterval(this.updateTimer);
 			clearTimeout(this.updateWatchdog);
 			this.$buefy.toast.open({
