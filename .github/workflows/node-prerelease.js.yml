@@ -1,4 +1,4 @@
-name: alpha prerelease CI
+name: release CI
 
 on:
   workflow_call:
@@ -91,6 +91,6 @@ jobs:
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "$ASSET" --clobber
           else
-            gh release create "$TAG" "$ASSET" --title "$TAG" --notes "neo-casaos-ui $TAG" --prerelease
+            gh release create "$TAG" "$ASSET" --title "$TAG" --notes "neo-casaos-ui $TAG"
           fi
 
