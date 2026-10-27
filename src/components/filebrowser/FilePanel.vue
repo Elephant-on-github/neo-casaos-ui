@@ -645,12 +645,17 @@ export default {
 		},
 
 		/**
-		 * @description: Toggle visibility of hidden (dot) files and re-list the folder
+		 * @description: Toggle visibility of hidden (dot) files and re-list the folder,
+		 * preserving any active folder search instead of wiping it.
 		 */
 		toggleShowHidden() {
 			this.showHidden = !this.showHidden;
 			localStorage.setItem("casaos_show_hidden", String(this.showHidden));
-			this.reload();
+			if (this.searchKeyword.trim()) {
+				this.doSearch(this.searchKeyword);
+			} else {
+				this.reload();
+			}
 		},
 
 		/**
