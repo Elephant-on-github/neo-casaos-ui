@@ -118,7 +118,7 @@
 								<!-- Header End -->
 
 								<!-- Search Start -->
-								<div class="is-flex is-align-items-center mb-2 is-flex-shrink-0">
+								<div class="is-flex is-align-items-center mb-2 is-flex-shrink-0 file-search">
 									<b-input
 										v-model="searchKeyword"
 										type="search"
@@ -1247,4 +1247,23 @@ export default {
 		overflow: hidden;
 	}
 }
+
+.file-search {
+  width: 100%;
+  max-width: 30rem;
+
+  .input {
+    width: 100%;
+
+    input {
+      font-size: 0.875rem;
+      height: 2.5rem;
+      padding: 0 0.75rem;
+      box-sizing: border-box;
+    }
+  }
+}
 </style>
+
+
+
