@@ -237,7 +237,7 @@ export default {
 		 */
 		async getList () {
 			try {
-				const orgAppList = await this.$openAPI.appGrid.getAppGrid().then(res => res.data.data || [])
+				const orgAppList = await this.$openAPI.appGrid.getAppGrid().then(res => (res?.data?.data) || [])
 				let orgOldAppList = [],
 					orgNewAppList = []
 				orgAppList.forEach(item => {
@@ -603,3 +603,4 @@ export default {
 	}
 }
 </style>
+
