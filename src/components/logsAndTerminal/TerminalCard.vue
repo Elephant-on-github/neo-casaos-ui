@@ -54,7 +54,7 @@ export default {
 	props: {
 		id: String,
 		label: String,
-		initWsUrl: String,
+		initWsUrl: { type: String, default: "" },
 		standalone: { type: Boolean, default: false }
 	},
 	data() {
@@ -97,7 +97,7 @@ export default {
 		this.rows = document.getElementById('terminal').offsetHeight / 16 - 6;
 		this.cols = document.getElementById('terminal').offsetWidth / 14;
 
-		if (this.initWsUrl != "") {
+		if (this.initWsUrl) {
 			this.isVaild = true
 			this.wsUrl = this.initWsUrl;
 			this.initSocket();
@@ -261,6 +261,7 @@ export default {
 	}
 }
 </style>
+
 
 
 
