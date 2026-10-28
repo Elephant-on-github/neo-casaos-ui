@@ -3,6 +3,7 @@ import AccountPanel from './account/AccountPanel.vue'
 import TerminalPanel from './logsAndTerminal/TerminalPanel.vue'
 import PortPanel from './settings/PortPanel.vue'
 import UpdateModal from './settings/UpdateModal.vue'
+import InfoPanel from './settings/InfoPanel.vue'
 import { mixin } from '@/mixins/mixin'
 import messages from '@/assets/lang'
 
@@ -337,6 +338,18 @@ export default {
         props: {
           changeLog: this.updateInfo.version.change_log,
         },
+      })
+    },
+
+    showInfoModal() {
+      this.$buefy.modal.open({
+        parent: this,
+        component: InfoPanel,
+        hasModalCard: true,
+        trapFocus: true,
+        canCancel: ['escape'],
+        scroll: 'keep',
+        animation: 'zoom-in',
       })
     },
 
@@ -763,6 +776,21 @@ export default {
             </div>
           </div>
           <!-- Update End -->
+          <!-- Info / About Start -->
+          <div class="_is-large hover-effect _is-radius pr-2 mr-4 ml-4">
+            <div class="is-flex is-align-items-center">
+              <div class="is-flex is-align-items-center is-flex-grow-1 _is-normal">
+                <b-icon class="mr-1 ml-2" icon="information-outline" pack="casa" size="is-20" />
+                {{ $t("About") }}
+              </div>
+              <div class="ml-2">
+                <b-button rounded size="is-small" type="is-dark" @click="showInfoModal">
+                  {{ $t("View") }}
+                </b-button>
+              </div>
+            </div>
+          </div>
+          <!-- Info / About End -->
           <!-- Restart or Shutdown Start -->
           <div
             class="is-flex is-align-content-center is-justify-content-center _footer mt-4 pl-3 pr-3 pt-2 pb-2"
@@ -1156,3 +1184,4 @@ export default {
 	}
 }
 </style>
+
