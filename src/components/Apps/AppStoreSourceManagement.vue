@@ -104,7 +104,7 @@ function getSourceList() {
 			const storeList = res.data.data.filter(item => {
 				console.log(item.url);
 				const isHttp = item.url.includes("http");
-				const pathname = isHttp ? new URL(item.url).pathname : item.url;
+				let pathname = item.url; if (isHttp) { try { pathname = new URL(item.url).pathname } catch (e) { return false } }
 				const pathnameList = pathname.split("/");
 				const sourceName = isHttp ? pathnameList[1] : pathnameList[pathnameList.length - 1].split('.').slice(0, -1).join('.');
 				if (pathnameList[1] === "IceWhaleTech") {

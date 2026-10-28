@@ -267,8 +267,8 @@ export default {
       return this.arch
     },
     filteredPageList() {
-      if (Object.keys(this.pageList).length === 0)
-        return []
+      if (!Array.isArray(this.pageList) || this.pageList.length === 0)
+	\t\treturn []
       return this.pageList.filter((app) => {
         const keywords = (app.title + app.tagline)?.toLocaleLowerCase() ?? ''
         for (const term of this.searchKey.split(' ')) {
@@ -452,7 +452,7 @@ export default {
             return item.count > 0
           }),
         )
-        this.currentCate = this.cateMenu[0]
+        this.currentCate = this.cateMenu.length ? this.cateMenu[0] : { name: 'All', id: 0 }
         this.currentSort = this.sortMenu[0]
         if (this.isFirst) {
           this.isFirst = false
@@ -2198,3 +2198,4 @@ search-fade-leave-active {
     opacity: 0;
 }
 </style>
+
