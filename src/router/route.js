@@ -59,6 +59,16 @@ export default [
 		}
 	},
 	{
+		path: '/terminal',
+		name: 'Terminal',
+		hidden: true,
+		component: () => import('@/views/Terminal.vue'),
+		meta: {
+			requireAuth: true,
+			showBackground: false
+		}
+	},
+	{
 		path: '/developmentElement',
 		name: 'DevelopmentElement',
 		hidden: true,
