@@ -60,7 +60,7 @@
 		</draggable>
 		<!-- App List End -->
 
-		<template v-if="exsitingAppsShow && oldAppList.length > 0">
+		<template v-if="existingAppsShow && oldAppList.length > 0">
 			<!-- Title Bar Start -->
 			<div class="title-bar is-flex is-align-items-center mt-2rem mb-5">
 				<app-section-title-tip
@@ -180,7 +180,7 @@ export default {
 		showDragTip () {
 			return this.draggable === '.handle'
 		},
-		exsitingAppsShow () {
+		existingAppsShow () {
 			return this.$store.state.existingAppsSwitch
 		}
 	},
@@ -604,6 +604,7 @@ export default {
 	}
 }
 </style>
+
 
 
 

@@ -268,7 +268,7 @@ export default {
     },
     filteredPageList() {
       if (!Array.isArray(this.pageList) || this.pageList.length === 0)
-	\t\treturn []
+						return []
       return this.pageList.filter((app) => {
         const keywords = (app.title + app.tagline)?.toLocaleLowerCase() ?? ''
         for (const term of this.searchKey.split(' ')) {
