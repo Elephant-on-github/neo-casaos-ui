@@ -1,7 +1,7 @@
 <template>
-	<fullscreen :class="[{ 'mt-4': !fullscreen }, isVaild ? 'fdark-bg' : 'flight-bg']" :fullscreen.sync="fullscreen"
-		:page-only="true" :teleport="true" class="fullScreen  pl-2 pt-2 pb-2" @change="onWindowResize">
-		<a v-if="isVaild" class="fullscreen-button" @click="toggleFullScreen">
+<component :is="wrapperTag" :class="wrapperClass" v-bind="wrapperProps" @change="onWindowResize" @update:fullscreen="fullscreen = $event">
+
+		<a v-if="isVaild && !standalone" class="fullscreen-button" @click="toggleFullScreen">
 			<b-icon :icon="buttonIcon"></b-icon>
 		</a>
 		<div id="terminal" class="is-flex is-align-items-center is-justify-content-center">
@@ -38,7 +38,7 @@
 
 			<div v-else id="xterm" :class="[fullscreen ? 'fullheight' : 'sheight']" class="xterm"></div>
 		</div>
-	</fullscreen>
+	</component>
 </template>
 
 <script>
@@ -54,8 +54,8 @@ export default {
 	props: {
 		id: String,
 		label: String,
-		initWsUrl: String
-	},
+		initWsUrl: String,
+		standalone: { type: Boolean, default: false }
 	data() {
 		return {
 			fullscreen: false,
@@ -76,6 +76,17 @@ export default {
 	computed: {
 		buttonSzie() {
 			return this.$store.state.device == "mobile" ? 'is-small' : ''
+		},
+		wrapperTag() {
+			return this.standalone ? 'div' : 'fullscreen';
+		},
+		wrapperClass() {
+			if (this.standalone) return 'terminal-standalone';
+			return [{ 'mt-4': !this.fullscreen }, this.isVaild ? 'fdark-bg' : 'flight-bg', 'fullScreen', 'pl-2', 'pt-2', 'pb-2'];
+		},
+		wrapperProps() {
+			if (this.standalone) return {};
+			return { fullscreen: this.fullscreen, 'page-only': true, teleport: true };
 		},
 		buttonIcon() {
 			return this.fullscreen ? "fullscreen-exit" : "fullscreen"
@@ -249,3 +260,6 @@ export default {
 	}
 }
 </style>
+
+
+

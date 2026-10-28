@@ -1,6 +1,6 @@
 <template>
 	<div class="terminal-page">
-		<terminal-card class="terminal-card"></terminal-card>
+		<terminal-card class="terminal-card" standalone />
 	</div>
 </template>
 
@@ -17,15 +17,15 @@ export default {
 
 <style lang="scss" scoped>
 .terminal-page {
+	position: relative;
 	width: 100%;
 	height: 100vh;
 	background: hsla(208, 20%, 12%, 1);
-	display: flex;
-	align-items: center;
-	justify-content: center;
+	overflow: hidden;
 }
 
 .terminal-card {
+	display: block;
 	width: 100%;
 	height: 100%;
 }
