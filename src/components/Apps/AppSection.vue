@@ -283,7 +283,7 @@ export default {
 				// Expose legacy (v1/container) apps so the TopBar "Show other Docker
 				// container app(s)" toggle actually renders when there are legacy
 				// containers to hide/show.
-				this.$store.commit('SET_NOTIMPORT_LIST', oldAppList)
+				this.$store.commit('SET_NOTIMPORT_LIST', this.oldAppList)
 				if (!isEqual(lateSortList, sortedList)) {
 					this.saveSortData()
 				}
@@ -604,6 +604,8 @@ export default {
 	}
 }
 </style>
+
+
 
 
 
