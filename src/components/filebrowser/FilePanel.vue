@@ -1252,7 +1252,7 @@ export default {
 	width: 100%;
 	max-width: 30rem;
 
-	.input {
+	::v-deep .input {
 		width: 100%;
 		font-size: 0.875rem;
 		height: 2.5rem;
@@ -1261,6 +1261,7 @@ export default {
 	}
 }
 </style>
+
 
 
 
