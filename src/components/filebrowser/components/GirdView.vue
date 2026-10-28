@@ -38,7 +38,7 @@
 										</div>
 										<div class="info">
 											<p class="title" >{{ item.name }}</p>
-											<p class="desc">{{ item.date | dateFmt }}</p>
+											<p class="desc">{{ item.date | dateFmt }}  {{ item.size | renderSize }}</p>
 										</div>
 									</div>
 
@@ -112,3 +112,5 @@ export default {
 	},
 };
 </script>
+
+

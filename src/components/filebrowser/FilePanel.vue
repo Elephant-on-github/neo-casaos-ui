@@ -610,6 +610,7 @@ export default {
 									return !item.name.startsWith(".");
 								});
 						this.listData = orderBy(filterList, ["is_dir"], ["desc"]);
+						this.fetchFolderSizes(this.listData);
 						this.handelListChange(this.listData);
 						this.errorMsg = "";
 						this.isEmpty = true;
@@ -700,6 +701,7 @@ export default {
 						? items
 						: items.filter((item) => !item.name.startsWith("."));
 					this.listData = orderBy(filterList, ["is_dir"], ["desc"]);
+						this.fetchFolderSizes(this.listData);
 					this.handelListChange(this.listData);
 					// no matches → show the message holder instead of "new file" prompts
 					this.isEmpty = filterList.length > 0;
@@ -721,7 +723,21 @@ export default {
 		 * @param {*} bool
 		 * @return {*}
 		 */
-		handleSelect(bool) {
+				/**
+		 * @description: Fetch recursive sizes for directory entries (best-effort;
+		 * ignores inaccessible paths).
+		 */
+	fetchFolderSizes(list) {
+		const dirs = (list || []).filter(item => item && item.is_dir);
+		Promise.allSettled(dirs.map(item =>
+			this.$api.folder.getFolderSize(item.path).then(res => {
+				if (res && res.data && res.data.success == 200 && res.data.data != null) {
+					item.size = res.data.data;
+				}
+			}).catch(() => {})
+		));
+	},
+	handleSelect(bool) {
 			if (bool) {
 				this.listData.forEach((item, index) => {
 					item.isSelected = true;
@@ -1261,6 +1277,8 @@ export default {
 	}
 }
 </style>
+
+
 
 
 

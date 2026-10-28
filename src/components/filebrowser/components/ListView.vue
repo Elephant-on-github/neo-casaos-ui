@@ -66,8 +66,7 @@
 									<div class="one-line is-size-7">{{ item.date | dateFmt }}</div>
 								</div>
 								<div v-if="!isMobile" class="td">
-									<div v-if="!item.is_dir" class="one-line is-size-7">
-										{{ item.size | renderSize }}
+									<div class="one-line is-size-7">{{ item.size | renderSize }}</div>
 									</div>
 								</div>
 							</div>
