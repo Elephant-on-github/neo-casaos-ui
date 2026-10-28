@@ -1249,21 +1249,19 @@ export default {
 }
 
 .file-search {
-  width: 100%;
-  max-width: 30rem;
+	width: 100%;
+	max-width: 30rem;
 
-  .input {
-    width: 100%;
-
-    input {
-      font-size: 0.875rem;
-      height: 2.5rem;
-      padding: 0 0.75rem;
-      box-sizing: border-box;
-    }
-  }
+	.input {
+		width: 100%;
+		font-size: 0.875rem;
+		height: 2.5rem;
+		padding: 0 0.75rem;
+		box-sizing: border-box;
+	}
 }
 </style>
+
 
 
 
