@@ -5,6 +5,10 @@ const dotenv = require("dotenv");
 const isProd = process.env.NODE_ENV === "prod";
 const TerserPlugin = require("terser-webpack-plugin");
 
+// UI version is driven by CI (the release tag). Fall back to package.json for local dev.
+const uiVersion = process.env.UI_VERSION || require("./package.json").version;
+process.env.UI_VERSION = uiVersion;
+
 module.exports = {
 	publicPath: "/",
 	runtimeCompiler: true,

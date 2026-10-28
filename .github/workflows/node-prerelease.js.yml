@@ -79,6 +79,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
       - run: pnpm build
+        env:
+          UI_VERSION: ${{ steps.get_version.outputs.VERSION }}
       - run: |
           tar -zcvf linux-all-casaos-${{ steps.get_version.outputs.VERSION }}.tar.gz build
 

@@ -35,7 +35,7 @@ export default {
 	data() {
 		return {
 			backendVersion: '',
-			uiVersion: 'v0.4.44',
+			uiVersion: (typeof process !== 'undefined' && process.env && process.env.UI_VERSION) ? process.env.UI_VERSION : 'dev',
 			gatewayVersion: 'v0.4.10',
 			arch: '',
 		}
@@ -113,4 +113,5 @@ export default {
 	color: #222;
 }
 </style>
+
 
