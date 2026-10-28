@@ -35,7 +35,7 @@ export default {
 	data() {
 		return {
 			backendVersion: '',
-			uiVersion: 'v0.4.41',
+			uiVersion: 'v0.4.44',
 			gatewayVersion: 'v0.4.10',
 			arch: '',
 		}
@@ -113,3 +113,4 @@ export default {
 	color: #222;
 }
 </style>
+
