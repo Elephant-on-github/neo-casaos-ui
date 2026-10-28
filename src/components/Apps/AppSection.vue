@@ -152,9 +152,9 @@ export default {
 			appHelpText: 'Drag icons to sort.',
 			draggable: '.handle',
 			retryCount: 0,
+			isDestroyed: false,
 			appListErrorMessage: '',
 			skCount: 0,
-			ListRefreshTimer: null
 		}
 	},
 	components: {
@@ -200,7 +200,7 @@ export default {
 		}, 5000)
 	},
 	beforeDestroy () {
-		this.$EventBus.$off(events.OPEN_APP_STORE_AND_GOTO_SYNCTHING)
+		this.isDestroyed = true;
 		window.removeEventListener('resize', this.getSkCount)
 
 		clearInterval(this.ListRefreshTimer)
@@ -236,11 +236,11 @@ export default {
 		 * @return {*} void
 		 */
 		async getList () {
-			try {
-				const orgAppList = await this.$openAPI.appGrid.getAppGrid().then(res => (res?.data?.data) || [])
-				let orgOldAppList = [],
-					orgNewAppList = []
-				orgAppList.forEach(item => {
+			if (this.isDestroyed) return;
+		try {
+			const orgAppList = await this.$openAPI.appGrid.getAppGrid().then(res => (res?.data?.data) || [])
+			let orgOldAppList = [], orgNewAppList = []
+			orgAppList.forEach(item => {
 					item.hostname = item.hostname || this.$baseIp
 					// Container app does not have icon.
 					item.icon = item.icon || require(`@/assets/img/app/default.svg`)
