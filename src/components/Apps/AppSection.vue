@@ -264,7 +264,8 @@ export default {
 				// get app sort info.
 				let lateSortList = await this.$api.users
 					.getCustomStorage(orderConfig)
-					.then(res => res.data.data.data || [])
+					.then(res => (res?.data?.data?.data) || [])
+					if (!Array.isArray(lateSortList)) lateSortList = []
 
 				// filter anything not in casaAppList.
 				const propList = casaAppList.map(obj => obj.name)
@@ -603,4 +604,6 @@ export default {
 	}
 }
 </style>
+
+
 
