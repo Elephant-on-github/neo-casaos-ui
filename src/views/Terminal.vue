@@ -1,21 +1,16 @@
 <template>
 	<div class="terminal-page">
-		<terminal-panel @close="goHome" />
+		<terminal-card class="terminal-card"></terminal-card>
 	</div>
 </template>
 
 <script>
-import TerminalPanel from '@/components/logsAndTerminal/TerminalPanel.vue'
+import TerminalCard from '@/components/logsAndTerminal/TerminalCard.vue'
 
 export default {
 	name: 'Terminal',
 	components: {
-		TerminalPanel
-	},
-	methods: {
-		goHome() {
-			this.$router.push('/')
-		}
+		TerminalCard
 	}
 }
 </script>
@@ -25,5 +20,13 @@ export default {
 	width: 100%;
 	height: 100vh;
 	background: hsla(208, 20%, 12%, 1);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.terminal-card {
+	width: 100%;
+	height: 100%;
 }
 </style>
