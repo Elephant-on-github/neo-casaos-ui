@@ -56,6 +56,7 @@ export default {
 		label: String,
 		initWsUrl: String,
 		standalone: { type: Boolean, default: false }
+	},
 	data() {
 		return {
 			fullscreen: false,
