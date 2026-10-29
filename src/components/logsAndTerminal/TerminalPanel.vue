@@ -43,6 +43,12 @@ export default {
 		TerminalCard,
 		LogsCard
 	},
+	props: {
+		initialTab: {
+			type: String,
+			default: 'terminal'
+		}
+	},
 	data() {
 		return {
 			isLoading: false,
@@ -53,6 +59,7 @@ export default {
 		}
 	},
 	mounted() {
+		this.showTabName = this.initialTab || 'terminal';
 		this.getLogs();
 		this.timer = setInterval(() => {
 			this.getLogs();

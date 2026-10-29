@@ -396,6 +396,21 @@ export default {
         animation: 'zoom-in',
       })
     },
+    showLogsModal() {
+      this.$buefy.modal.open({
+        parent: this,
+        component: TerminalPanel,
+        hasModalCard: true,
+        customClass: 'terminal-modal',
+        trapFocus: true,
+        canCancel: ['escape'],
+        scroll: 'keep',
+        animation: 'zoom-in',
+        props: {
+          initialTab: 'logs'
+        }
+      })
+    },
 
     rssConfirm() {
       if (this.rss_switch == false) {
@@ -791,6 +806,21 @@ export default {
             </div>
           </div>
           <!-- Info / About End -->
+          <!-- System Logs Start -->
+          <div class="_is-large hover-effect _is-radius pr-2 mr-4 ml-4">
+            <div class="is-flex is-align-items-center">
+              <div class="is-flex is-align-items-center is-flex-grow-1 _is-normal">
+                <b-icon class="mr-1 ml-2" icon="file-document-outline" pack="casa" size="is-20" />
+                {{ $t("System Logs") }}
+              </div>
+              <div class="ml-2">
+                <b-button rounded size="is-small" type="is-dark" @click="showLogsModal">
+                  {{ $t("View") }}
+                </b-button>
+              </div>
+            </div>
+          </div>
+          <!-- System Logs End -->
           <!-- Restart or Shutdown Start -->
           <div
             class="is-flex is-align-content-center is-justify-content-center _footer mt-4 pl-3 pr-3 pt-2 pb-2"
