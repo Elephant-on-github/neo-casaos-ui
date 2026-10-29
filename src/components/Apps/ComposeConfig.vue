@@ -953,7 +953,7 @@ export default {
           </div>
           <EnvInputGroup v-if="!envFileMode" v-model="service.environment" :label="$t('Environment Variables')" :message="$t('No environment variables now, click “+” to add one.')" />
           <b-field v-else :label="$t('Environment Variables')">
-            <b-input v-model="envText[key]" type="textarea" @blur="parseEnvText(key, service)" @change="parseEnvText(key, service)" />
+            <b-input v-model="envText[key]" type="textarea" rows="8" @change="parseEnvText(key, service)" />
           </b-field>
           <InputGroup :devices="service.devices" :label="$t('Devices')" :message="$t('No devices now, click “+” to add one.')" type="device" />
           <CommandsInput v-model="service.command" :label="$t('Container Command')" :message="$t('No commands now, click “+” to add one.')" />
