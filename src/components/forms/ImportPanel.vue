@@ -319,7 +319,7 @@ export default {
       <div class="is-flex-grow-1 has-text-full-04" />
       <div>
         <b-button :label="$t('Cancel')" rounded @click="$emit('close')" />
-        <b-button :label="$t('Submit')" rounded type="is-primary" :disabled="activeTab === 0 && !yamlValid" @click="emitSubmit" />
+        <b-button :label="$t('Submit')" rounded type="is-primary" :disabled="activeTab === 0 && !yamlValid" :title="activeTab === 0 && !yamlValid ? $t('Fix YAML errors before submitting') : ''" @click="emitSubmit" />
       </div>
     </footer>
     <!-- Modal-Card Footer End -->

@@ -947,7 +947,7 @@ export default {
 
           <VolumesInputGroup v-model="service.volumes" :label="$t('Volumes')" :message="$t('No volumes now, click “+” to add one.')" type="volume" />
           <div class="is-flex is-justify-content-flex-end mb-2">
-            <b-button size="is-small" rounded type="is-light" @click="toggleEnvFileMode">
+            <b-button size="is-small" rounded type="is-light" :aria-pressed="envFileMode" @click="toggleEnvFileMode">
               {{ envFileMode ? $t('Edit as rows') : $t('Edit as text') }}
             </b-button>
           </div>
