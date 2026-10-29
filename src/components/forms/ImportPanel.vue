@@ -167,7 +167,7 @@ export default {
           return
         }
         const appNameRaw = yaml?.['x-casaos']?.title?.en_us || Object.keys(yaml.services)[0] || ''
-        const appName = lowerFirst ? lowerFirst(appNameRaw) : appNameRaw
+        const appName = lowerFirst(appNameRaw)
         for (const serviceKey in yaml.services) {
           const service = yaml.services[serviceKey]
           if (!service || !service.volumes) {
@@ -180,14 +180,19 @@ export default {
                 const containerPath = parts[1]
                 const hostPath = parts[0]
                 const rest = parts.slice(2).join(':')
-                const newHost = this.volumeAutoCheck(containerPath, hostPath, appName)
+                const newHost = (!hostPath || hostPath === '' || hostPath === '/' || hostPath === containerPath)
+                  ? this.volumeAutoCheck(containerPath, hostPath, appName)
+                  : hostPath
                 return rest ? `${newHost}:${containerPath}:${rest}` : `${newHost}:${containerPath}`
               }
               return item
             }
             if (item && typeof item === 'object') {
               if (item.target && item.source !== undefined) {
-                item.source = this.volumeAutoCheck(item.target, item.source, appName)
+                const src = item.source
+                if (!src || src === '' || src === '/' || src === item.target) {
+                  item.source = this.volumeAutoCheck(item.target, src, appName)
+                }
               }
               return item
             }

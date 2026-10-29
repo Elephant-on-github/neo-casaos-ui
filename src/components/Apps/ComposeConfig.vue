@@ -213,7 +213,8 @@ export default {
             .then((res) => {
               this.serviceStableVersion = res.data.data.tag
             })
-            .catch(() => {
+            .catch((e) => {
+              console.error(e)
               this.serviceStableVersion = ''
             })
         }
@@ -482,7 +483,9 @@ export default {
         else if (item) {
           // 1\ replace value in object for example: {type: 'bind', source: '${VOLUME_PATH}', target: '/data'}
           Object.keys(this.volumes || {}).forEach((key) => {
-            item.source = item?.source.replace(key, this?.volumes[key] || '')
+            if (item?.source) {
+              item.source = item.source.replace(key, this?.volumes[key] || '')
+            }
             // item.target = item?.target
           })
 
@@ -653,13 +656,13 @@ export default {
       return (envArray || [])
         .filter(env => env && (env.container || env.host))
         .map(env => `${env.container || ''}=${env.host || ''}`)
-        .join('\\n')
+        .join('\n')
     },
 
     envTextToArray(text) {
       const result = []
       String(text || '')
-        .split(/\\r?\\n/)
+        .split(/\r?\n/)
         .forEach((line) => {
           const trimmed = line.trim()
           if (!trimmed || trimmed.startsWith('#')) {
