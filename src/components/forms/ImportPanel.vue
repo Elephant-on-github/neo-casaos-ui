@@ -1,6 +1,7 @@
 <script>
 import { parse, stringify } from 'yaml'
 import composerize from 'composerize'
+import lowerFirst from 'lodash/lowerFirst'
 
 export default {
   props: {
@@ -21,6 +22,40 @@ export default {
       dropText: this.$t('Drop your Docker Compose file here or click to upload'),
       uploadIcon: 'upload',
     }
+  },
+  computed: {
+    yamlValid() {
+      if (this.activeTab !== 0) {
+        return true
+      }
+      const txt = String(this.dockerComposeCommands || '').trim()
+      if (!txt) {
+        return true
+      }
+      try {
+        parse(txt)
+        return true
+      }
+      catch {
+        return false
+      }
+    },
+    yamlError() {
+      if (this.activeTab !== 0) {
+        return ''
+      }
+      const txt = String(this.dockerComposeCommands || '').trim()
+      if (!txt) {
+        return ''
+      }
+      try {
+        parse(txt)
+        return ''
+      }
+      catch (e) {
+        return e && e.message ? e.message : String(e)
+      }
+    },
   },
   methods: {
     /**
@@ -124,6 +159,49 @@ export default {
       return (newArray === undefined) ? [] : newArray
     },
 
+    autoFillVolumePaths() {
+      try {
+        const yaml = parse(this.dockerComposeCommands)
+        if (!yaml || !yaml.services) {
+          this.errors = this.$t('Invalid YAML')
+          return
+        }
+        const appNameRaw = yaml?.['x-casaos']?.title?.en_us || Object.keys(yaml.services)[0] || ''
+        const appName = lowerFirst ? lowerFirst(appNameRaw) : appNameRaw
+        for (const serviceKey in yaml.services) {
+          const service = yaml.services[serviceKey]
+          if (!service || !service.volumes) {
+            continue
+          }
+          service.volumes = this.makeArray(service.volumes).map((item) => {
+            if (typeof item === 'string') {
+              const parts = item.split(':')
+              if (parts.length > 1) {
+                const containerPath = parts[1]
+                const hostPath = parts[0]
+                const rest = parts.slice(2).join(':')
+                const newHost = this.volumeAutoCheck(containerPath, hostPath, appName)
+                return rest ? `${newHost}:${containerPath}:${rest}` : `${newHost}:${containerPath}`
+              }
+              return item
+            }
+            if (item && typeof item === 'object') {
+              if (item.target && item.source !== undefined) {
+                item.source = this.volumeAutoCheck(item.target, item.source, appName)
+              }
+              return item
+            }
+            return item
+          })
+        }
+        this.dockerComposeCommands = stringify(yaml)
+        this.errors = ''
+      }
+      catch (e) {
+        this.errors = e && e.message ? e.message : String(e)
+      }
+    },
+
     checkYAML() {
       const yaml = parse(this.dockerComposeCommands)
       if (!(yaml?.name in yaml.services)) {
@@ -186,9 +264,14 @@ export default {
     <section class="modal-card-body">
       <b-tabs v-model="activeTab" :animated="false">
         <b-tab-item label="Docker Compose">
-          <b-field :message="errors" :type="{ 'is-danger': !!errors }">
+          <b-field :message="yamlError || errors" :type="{ 'is-danger': !!(yamlError || errors) }">
             <b-input v-model="dockerComposeCommands" :placeholder="$t('Notice: If there are multiple services, only the first set can be analyzed correctly')" class="import-area" type="textarea" />
           </b-field>
+          <div class="is-flex is-justify-content-flex-end mb-2">
+            <b-button size="is-small" rounded type="is-light" @click="autoFillVolumePaths">
+              {{ $t('Auto-fill volume paths') }}
+            </b-button>
+          </div>
 
           <b-upload ref="importUpload" v-model="dropFiles" accept=".yaml,.yml" drag-drop expanded @input="onSelect">
             <section class="section">
@@ -231,7 +314,7 @@ export default {
       <div class="is-flex-grow-1 has-text-full-04" />
       <div>
         <b-button :label="$t('Cancel')" rounded @click="$emit('close')" />
-        <b-button :label="$t('Submit')" rounded type="is-primary" @click="emitSubmit" />
+        <b-button :label="$t('Submit')" rounded type="is-primary" :disabled="activeTab === 0 && !yamlValid" @click="emitSubmit" />
       </div>
     </footer>
     <!-- Modal-Card Footer End -->

@@ -149,6 +149,9 @@ export default {
       memory_min: 256,
       // other level_config
       volumes: [],
+      errors: '',
+      envFileMode: false,
+      envText: {},
     }
   },
   computed: {
@@ -210,7 +213,7 @@ export default {
             .then((res) => {
               this.serviceStableVersion = res.data.data.tag
             })
-            .catch((e) => {
+            .catch(() => {
               this.serviceStableVersion = ''
             })
         }
@@ -350,6 +353,7 @@ export default {
      */
     async parseComposeYaml(val) {
       try {
+        this.errors = ''
         const yaml = YAML.parse(val)
         if (!yaml) {
           return
@@ -375,6 +379,7 @@ export default {
       }
       catch (error) {
         console.error(error)
+        this.errors = (error && error.message) ? error.message : String(error)
       }
     },
 
@@ -454,7 +459,7 @@ export default {
         if (isString(item)) {
           // 1\ replace variable in string for example: ${VOLUME_PATH}:/data
           // this.volumes 可能为空。
-          Object.keys(this.volumes || {}).map((key) => {
+          Object.keys(this.volumes || {}).forEach((key) => {
             item = item.replace(key, this.volumes[key] || '')
           })
           // 2\ split string
@@ -476,14 +481,15 @@ export default {
         }
         else if (item) {
           // 1\ replace value in object for example: {type: 'bind', source: '${VOLUME_PATH}', target: '/data'}
-          Object.keys(this.volumes || {}).map((key) => {
+          Object.keys(this.volumes || {}).forEach((key) => {
             item.source = item?.source.replace(key, this?.volumes[key] || '')
             // item.target = item?.target
           })
 
           return item
         }
-      })
+        return null
+      }).filter(Boolean)
       isNil(composeServicesItem.volumes) && this.$set(composeServicesItem, 'volumes', [])
 
       // Devices
@@ -627,6 +633,53 @@ export default {
       })
 
       return finalHostPath
+    },
+
+    toggleEnvFileMode() {
+      this.envFileMode = !this.envFileMode
+      if (this.envFileMode) {
+        for (const key in this.configData.services) {
+          this.$set(this.envText, key, this.envArrayToText(this.configData.services[key].environment))
+        }
+      }
+      else {
+        for (const key in this.configData.services) {
+          this.configData.services[key].environment = this.envTextToArray(this.envText[key] || '')
+        }
+      }
+    },
+
+    envArrayToText(envArray) {
+      return (envArray || [])
+        .filter(env => env && (env.container || env.host))
+        .map(env => `${env.container || ''}=${env.host || ''}`)
+        .join('\\n')
+    },
+
+    envTextToArray(text) {
+      const result = []
+      String(text || '')
+        .split(/\\r?\\n/)
+        .forEach((line) => {
+          const trimmed = line.trim()
+          if (!trimmed || trimmed.startsWith('#')) {
+            return
+          }
+          const idx = trimmed.indexOf('=')
+          if (idx === -1) {
+            result.push({ container: trimmed, host: '' })
+          }
+          else {
+            result.push({ container: trimmed.slice(0, idx).trim(), host: trimmed.slice(idx + 1) })
+          }
+        })
+      return result
+    },
+
+    parseEnvText(key, service) {
+      if (service) {
+        service.environment = this.envTextToArray(this.envText[key])
+      }
     },
 
     makeArray(foo) {
@@ -781,6 +834,9 @@ export default {
 
 <template>
   <section style="height: calc(100vh - 12.8125rem)">
+    <b-message v-if="errors" type="is-danger" class="mx-3 mt-2">
+      {{ errors }}
+    </b-message>
     <b-tabs class="has-text-full-03" style="height: 100%" :value="firstAppName">
       <b-tab-item v-for="(service, key) in configData.services" :key="key" :label="key" :value="key" @click="current_service = key">
         <ValidationObserver :ref="`${key}valida`">
@@ -887,7 +943,15 @@ export default {
           <Ports v-if="showPorts(service)" v-model="service.ports" :ports_in_use="ports_in_use" :show-host-post="showHostPort(service)" />
 
           <VolumesInputGroup v-model="service.volumes" :label="$t('Volumes')" :message="$t('No volumes now, click “+” to add one.')" type="volume" />
-          <EnvInputGroup v-model="service.environment" :label="$t('Environment Variables')" :message="$t('No environment variables now, click “+” to add one.')" />
+          <div class="is-flex is-justify-content-flex-end mb-2">
+            <b-button size="is-small" rounded type="is-light" @click="toggleEnvFileMode">
+              {{ envFileMode ? $t('Edit as rows') : $t('Edit as text') }}
+            </b-button>
+          </div>
+          <EnvInputGroup v-if="!envFileMode" v-model="service.environment" :label="$t('Environment Variables')" :message="$t('No environment variables now, click “+” to add one.')" />
+          <b-field v-else :label="$t('Environment Variables')">
+            <b-input v-model="envText[key]" type="textarea" @blur="parseEnvText(key, service)" @change="parseEnvText(key, service)" />
+          </b-field>
           <InputGroup :devices="service.devices" :label="$t('Devices')" :message="$t('No devices now, click “+” to add one.')" type="device" />
           <CommandsInput v-model="service.command" :label="$t('Container Command')" :message="$t('No commands now, click “+” to add one.')" />
 
