@@ -47,7 +47,7 @@ export default {
 	data() {
 		return {
 			backendVersion: '',
-			uiVersion: (typeof process !== 'undefined' && process.env && process.env.UI_VERSION) ? process.env.UI_VERSION : 'dev',
+			uiVersion: process.env.UI_VERSION || 'dev',
 			gatewayVersion: 'v0.4.10',
 			arch: '',
 			components: null,
