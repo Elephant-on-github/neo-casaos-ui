@@ -81,6 +81,13 @@ export default {
     isRaspberryPi() {
       return this.deviceModel.toLowerCase().includes('raspberry')
     },
+    pendingComponents() {
+      const c = this.updateInfo && this.updateInfo.components
+      if (!c) return []
+      return Object.keys(c)
+        .filter((k) => c[k] && c[k].need_update)
+        .map((k) => ({ name: k, installed: c[k].installed, latest: c[k].latest }))
+    },
   },
   watch: {
     'barData.lang': {
@@ -784,6 +791,9 @@ export default {
             <div v-else class="is-flex is-align-items-center is-justify-content-end update-container pl-5">
               <div class="is-flex-grow-1 is-size-7">
                 {{ $t(updateText) }}
+                <span v-if="pendingComponents.length" class="ml-1">
+                  ({{ pendingComponents.map((p) => p.name + ' ' + p.installed + '→' + p.latest).join(', ') }})
+                </span>
               </div>
               <b-button class="ml-2" rounded size="is-small" type="is-dark" @click="showUpdateModal">
                 {{ $t("Update") }}

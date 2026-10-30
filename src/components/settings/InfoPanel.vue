@@ -20,6 +20,18 @@
 					<span class="info-label">{{ $t('Gateway') }}</span>
 					<span class="info-value">{{ gatewayVersion }}</span>
 				</div>
+				<div v-if="components" class="info-row info-components">
+					<span class="info-label">{{ $t('Components') }}</span>
+					<div class="info-value">
+						<div v-for="(c, name) in components" :key="name" class="info-component-row">
+							<span class="info-component-name">{{ name }}</span>
+							<span class="info-component-versions">{{ c.installed || '-' }} -&gt; {{ c.latest }}</span>
+							<span :class="c.need_update ? 'info-status-update' : 'info-status-ok'">
+								{{ c.need_update ? $t('Update available') : $t('Up to date') }}
+							</span>
+						</div>
+					</div>
+				</div>
 				<div class="info-row">
 					<span class="info-label">{{ $t('Architecture') }}</span>
 					<span class="info-value">{{ arch || '—' }}</span>
@@ -38,6 +50,7 @@ export default {
 			uiVersion: (typeof process !== 'undefined' && process.env && process.env.UI_VERSION) ? process.env.UI_VERSION : 'dev',
 			gatewayVersion: 'v0.4.10',
 			arch: '',
+			components: null,
 		}
 	},
 	created() {
@@ -62,8 +75,10 @@ export default {
 						this.backendVersion = res.data;
 					} else if (res.data.data && res.data.data.current_version) {
 						this.backendVersion = res.data.data.current_version;
+						this.components = res.data.data.components || null;
 					} else if (res.data.current_version) {
 						this.backendVersion = res.data.current_version;
+						this.components = res.data.components || null;
 					}
 				}
 			} catch (e) {

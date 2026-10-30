@@ -20,7 +20,13 @@
 		<footer class="modal-card-foot is-flex is-align-items-center">
 			<div class="is-flex-grow-1"></div>
 			<div>
-				<b-button :label="$t('Upgrade Now')" :loading="isUpdating" expaned rounded type="is-primary"
+				<div v-if="reloadNeeded" class="mr-3 is-size-7 has-text-success">
+					{{ $t('UI update applied. Reload to use the new version.') }}
+				</div>
+				<b-button v-if="reloadNeeded" rounded size="is-small" type="is-primary" @click="location.reload()">
+					{{ $t('Reload now') }}
+				</b-button>
+				<b-button v-else :label="$t('Upgrade Now')" :loading="isUpdating" expaned rounded type="is-primary"
 						  @click="updateSystem"/>
 			</div>
 		</footer>
@@ -45,7 +51,9 @@ export default {
 			updateWatchdog: 0,
 			isUpdating: false,
 			markdown: ``,
-			updateLogs: ``
+			updateLogs: ``,
+			updatedComponents: [],
+			reloadNeeded: false,
 		};
 	},
 	computed: {
@@ -71,7 +79,10 @@ export default {
 		async updateSystem() {
 			this.isUpdating = true;
 			try {
-				await this.$api.sys.updateCasaOS();
+				const res = await this.$api.sys.updateCasaOS();
+				if (res && res.data && res.data.data && res.data.data.updated_components) {
+					this.updatedComponents = res.data.data.updated_components;
+				}
 			} catch (e) {
 				// Backend POST /sys/update itself failed (network, 500). Without
 				// this the button stays in loading forever and getUpdateLogs never
@@ -103,11 +114,20 @@ export default {
 						localStorage.setItem('is_update', 'true')
 						clearInterval(this.updateTimer);
 						clearTimeout(this.updateWatchdog);
-						setTimeout(() => {
-							this.$router.replace({
-								path: '/logout'
-							})
-						}, 1000);
+						const uiOnly = this.updatedComponents.length > 0
+							&& this.updatedComponents.includes('ui')
+							&& !this.updatedComponents.includes('backend')
+							&& !this.updatedComponents.includes('gateway');
+						if (uiOnly) {
+							this.reloadNeeded = true;
+							this.isUpdating = false;
+						} else {
+							setTimeout(() => {
+								this.$router.replace({
+									path: '/logout'
+								})
+							}, 1000);
+						}
 					} else if (this.updateLogs.includes(`CasaOS upgrade failed`) || this.updateLogs.includes(`FAILED`)) {
 						// The neo update script (build/update.sh) never writes the
 						// canonical failure line - it prints "- FAILED <reason>" and
